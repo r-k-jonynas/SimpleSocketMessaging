@@ -6,7 +6,6 @@ As of now, the app successfully sends a message to another app user connected to
 
 ## Further milestones
 1. Fixing threads (currently, Toast message is displayed from the worker thread; I need to give it to a handler and display it on the main aka UI thread).
-2. Enabling communication over mobile data.
-
-## Note:
-If you have any feedback or advice, feel free to write an issue or contact me on Reddit (my handle: *u/r-k-j*). Would appreciate any help. I'm particularly lost in the mobile data issue.
+2. Enabling multiple chat connections at the same time.
+3. Connecting this backend to an already written UI for multiple concurrent connection chat.
+4. Enabling group chats.
