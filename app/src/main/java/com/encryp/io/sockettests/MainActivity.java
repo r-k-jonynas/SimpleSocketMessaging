@@ -9,16 +9,22 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 public class MainActivity extends AppCompatActivity {
+    TextView ownIP, mReceivedMessageField;
     EditText eHost, ePort, eName, eMessage;
     Button mButton;
 
@@ -26,16 +32,24 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // For printing out the host IP
+        ownIP = findViewById(R.id.ip_address_tview);
+        CheckIPBackgroundTask cIPbt = new CheckIPBackgroundTask();
+        cIPbt.execute();
+
         eHost = (EditText) findViewById(R.id.host_name);
         ePort = (EditText) findViewById(R.id.port_number);
         eName = (EditText) findViewById(R.id.user_name);
         eMessage = (EditText) findViewById(R.id.message);
         mButton = (Button) findViewById(R.id.send_message);
+        // For printing out the messages received
+        mReceivedMessageField = findViewById(R.id.received_mssg_tview);
 
         Thread myThread = new Thread(new MyServer());
         myThread.start();
     }
 
+    
     class MyServer implements Runnable {
         ServerSocket ss;
         Socket mysocket;
@@ -66,7 +80,8 @@ public class MainActivity extends AppCompatActivity {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+//                            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                            mReceivedMessageField.setText(message);
                         }
                     });
                 }
@@ -85,6 +100,23 @@ public class MainActivity extends AppCompatActivity {
                 eName.getText().toString(), eMessage.getText().toString());
         Toast.makeText(getApplicationContext(),"Message sent", Toast.LENGTH_SHORT).show();
     }
+
+    class CheckIPBackgroundTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            try(final DatagramSocket socket = new DatagramSocket()) {
+                socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+                ownIP.setText(socket.getLocalAddress().getHostAddress());
+            } catch (SocketException e) {
+                ownIP.setText("SocketException");
+            } catch (UnknownHostException e) {
+                ownIP.setText("UnknownHostException");
+            }
+            return null;
+        }
+    }
+
 
     class MessageBackgroundTask extends AsyncTask<String, Void, String> {
         Socket s;
